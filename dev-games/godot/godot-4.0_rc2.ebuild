@@ -22,7 +22,7 @@ SLOT="4"
 KEYWORDS="~amd64"
 # Enable roughly same as upstream by default so it works as expected,
 # except raycast (tools-only heavy dependency), and deprecated.
-IUSE="debug deprecated +gui raycast +runner test +theora +tools +upnp +vulkan +webp"
+IUSE="debug deprecated +gui raycast +runner test +theora +tools +upnp +vulkan +webp +mono"
 # tests need more figuring out, they are still somewhat new and volatile
 RESTRICT="test"
 
@@ -55,6 +55,7 @@ RDEPEND="
 	theora? ( media-libs/libtheora )
 	tools? ( app-misc/ca-certificates )
 	upnp? ( net-libs/miniupnpc:= )
+	mono? ( dev-lang/mono dev-dotnet/dotnet-sdk-bin )
 	webp? ( media-libs/libwebp:= )"
 DEPEND="
 	${RDEPEND}
@@ -148,7 +149,7 @@ src_compile() {
 		# modules with optional dependencies, "possible" to disable more but
 		# gets messy and breaks all sorts of features (expected enabled)
 		module_gridmap_enabled=$(usex deprecated) # fails without deprecated
-		module_mono_enabled=no # unhandled
+		module_mono_enabled=$(usex mono)
 		# note raycast is only enabled on amd64+arm64, see raycast/config.py
 		module_raycast_enabled=$(usex gui $(usex tools $(usex raycast)))
 		module_theora_enabled=$(usex theora)
@@ -187,9 +188,9 @@ src_test() {
 src_install() {
 	local s=godot${SLOT}
 
-	newbin bin/godot*.main ${s}
+	newbin bin/godot*.main* ${s}
 	if use runner && use tools; then
-		newbin bin/godot*.runner ${s}-runner
+		newbin bin/godot*.runner* ${s}-runner
 	else
 		# always available, revdeps shouldn't depend on [runner]
 		dosym ${s} /usr/bin/${s}-runner
