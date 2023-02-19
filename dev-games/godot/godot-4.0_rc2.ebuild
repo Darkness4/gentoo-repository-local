@@ -24,7 +24,7 @@ KEYWORDS="~amd64"
 # except raycast (tools-only heavy dependency), and deprecated.
 IUSE="debug deprecated +gui raycast +runner test +theora +tools +upnp +vulkan +webp +mono"
 # tests need more figuring out, they are still somewhat new and volatile
-RESTRICT="test"
+RESTRICT="test network-sandbox"
 
 # dlopen: libX*,libglvnd
 RDEPEND="
@@ -55,7 +55,7 @@ RDEPEND="
 	theora? ( media-libs/libtheora )
 	tools? ( app-misc/ca-certificates )
 	upnp? ( net-libs/miniupnpc:= )
-	mono? ( dev-lang/mono dev-dotnet/dotnet-sdk-bin )
+	mono? ( dev-lang/mono dev-dotnet/dotnet-sdk-bin:6.0 )
 	webp? ( media-libs/libwebp:= )"
 DEPEND="
 	${RDEPEND}
@@ -177,7 +177,15 @@ src_compile() {
 		tests=$(usex tools $(usex test))
 	)
 
+	addpredict /dev/input
+
 	escons extra_suffix=main "${esconsargs[@]}"
+	if use mono; then
+		./bin/godot*.main.mono --headless  --generate-mono-glue modules/mono/glue || die
+		./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --godot-platform=linuxbsd || die
+		escons extra_suffix=main "${esconsargs[@]}"
+	fi
+
 }
 
 src_test() {
@@ -188,9 +196,21 @@ src_test() {
 src_install() {
 	local s=godot${SLOT}
 
-	newbin bin/godot*.main* ${s}
+	if use mono; then
+		newbin bin/godot*.main.mono ${s}
+		dodir /usr/bin/GodotSharp
+		insinto /usr/bin/GodotSharp
+		doins -r bin/GodotSharp/*
+	else
+		newbin bin/godot*.main ${s}
+	fi
+
 	if use runner && use tools; then
-		newbin bin/godot*.runner* ${s}-runner
+		if use mono; then
+			newbin bin/godot*.runner.mono ${s}-runner
+		else
+			newbin bin/godot*.runner ${s}-runner
+		fi
 	else
 		# always available, revdeps shouldn't depend on [runner]
 		dosym ${s} /usr/bin/${s}-runner
