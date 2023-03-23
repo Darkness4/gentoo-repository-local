@@ -29,7 +29,7 @@ fi
 LICENSE="Apache-2.0"
 SLOT="0"
 
-IUSE=""
+IUSE="hook"
 
 RDEPEND="
 	sys-libs/libnvidia-container
@@ -56,11 +56,13 @@ src_install() {
 	insinto "/etc/nvidia-container-runtime"
 	doins "${FILESDIR}/config.toml"
 
-	insinto "/usr/libexec/oci/hooks.d"
-	doins "oci-nvidia-hook"
+	if use hook; then
+		insinto "/usr/libexec/oci/hooks.d"
+		doins "oci-nvidia-hook"
 
-	insinto "/usr/share/containers/oci/hooks.d"
-	doins "oci-nvidia-hook.json"
+		insinto "/usr/share/containers/oci/hooks.d"
+		doins "oci-nvidia-hook.json"
+	fi
 }
 
 pkg_postinst() {
