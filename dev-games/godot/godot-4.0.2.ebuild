@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=(python3_{9..11})
 inherit bash-completion-r1 desktop python-any-r1 scons-utils toolchain-funcs xdg
 
 DESCRIPTION="Multi-platform 2D and 3D game engine with a feature-rich editor"
@@ -72,7 +72,6 @@ BDEPEND="virtual/pkgconfig"
 PATCHES=(
 	"${FILESDIR}"/${PN}-4.0_beta3-headless-header.patch
 	"${FILESDIR}"/${PN}-4.0_rc2-musl.patch
-	"${FILESDIR}"/${PN}-4.0_rc2-gcc13.patch
 	"${FILESDIR}"/${PN}-4.0_rc3-scons.patch
 )
 
@@ -144,7 +143,7 @@ src_compile() {
 		builtin_msdfgen=yes # not wired for unbundling nor packaged
 		builtin_pcre2=no
 		builtin_recastnavigation=no
-		builtin_rvo2=yes # bundled copy has godot-specific changes
+		builtin_rvo2=yes   # bundled copy has godot-specific changes
 		builtin_squish=yes # ^ likewise, may not be safe to unbundle
 		builtin_wslay=no
 		builtin_xatlas=yes # not wired for unbundling nor packaged
@@ -154,7 +153,6 @@ src_compile() {
 
 		# modules with optional dependencies, "possible" to disable more but
 		# gets messy and breaks all sorts of features (expected enabled)
-		module_gridmap_enabled=$(usex deprecated) # fails without deprecated
 		module_mono_enabled=$(usex mono)
 		# note raycast is only enabled on amd64+arm64, see raycast/config.py
 		module_raycast_enabled=$(usex gui $(usex tools $(usex raycast)))
@@ -187,7 +185,7 @@ src_compile() {
 
 	escons extra_suffix=main "${esconsargs[@]}"
 	if use mono; then
-		./bin/godot*.main.mono --headless  --generate-mono-glue modules/mono/glue || die
+		./bin/godot*.main.mono --headless --generate-mono-glue modules/mono/glue || die
 		./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --godot-platform=linuxbsd || die
 		escons extra_suffix=main "${esconsargs[@]}"
 	fi
@@ -250,4 +248,3 @@ src_install() {
 	newins misc/dist/shell/_godot.zsh-completion _${s}
 	dosym _${s} /usr/share/zsh/site-functions/_${s}-runner
 }
-
