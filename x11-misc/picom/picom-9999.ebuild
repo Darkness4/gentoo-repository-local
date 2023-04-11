@@ -7,8 +7,8 @@ PYTHON_COMPAT=( python3_{9..11} )
 inherit git-r3 meson python-any-r1 virtualx xdg
 
 DESCRIPTION="A lightweight compositor for X11 (previously a compton fork)"
-HOMEPAGE="https://github.com/FT-Labs/picom"
-EGIT_REPO_URI="https://github.com/FT-Labs/picom.git"
+HOMEPAGE="https://github.com/xealea/picom"
+EGIT_REPO_URI="https://github.com/catb00mer/picom.git"
 EGIT_BRANCH="next"
 
 LICENSE="MPL-2.0 MIT"
