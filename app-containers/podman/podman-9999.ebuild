@@ -17,7 +17,7 @@ if [[ "${PV}" == "9999" ]]; then
 		git-r3_src_unpack
 	}
 else
-	EGIT_COMMIT="34e8f3933242f2e566bbbbf343cf69b7d506c1cf"
+	EGIT_COMMIT="75e3c12579d391b81d871fd1cded6cf0d043550a"
 	SRC_URI="https://github.com/containers/podman/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
 	KEYWORDS="~amd64 ~arm64 ~ppc64 ~riscv"
 	S=${WORKDIR}/${MY_P}
@@ -25,8 +25,9 @@ fi
 LICENSE="Apache-2.0 BSD BSD-2 CC-BY-SA-4.0 ISC MIT MPL-2.0"
 SLOT="0"
 
-IUSE="apparmor btrfs cgroup-hybrid +fuse +init +rootless selinux"
-RESTRICT+=" test"
+KEYWORDS="~amd64 ~arm64 ~ppc64 ~riscv"
+IUSE="apparmor btrfs cgroup-hybrid +fuse +init +rootless +cni netavark selinux"
+RESTRICT="test"
 
 COMMON_DEPEND="
 	app-crypt/gpgme:=
@@ -35,7 +36,8 @@ COMMON_DEPEND="
 	!cgroup-hybrid? ( app-containers/crun )
 	dev-libs/libassuan:=
 	dev-libs/libgpg-error:=
-	>=app-containers/cni-plugins-0.8.6
+	cni? ( >=app-containers/cni-plugins-0.8.6 )
+	netavark? ( app-containers/netavark app-containers/aardvark-dns )
 	sys-apps/shadow:=
 	sys-fs/lvm2
 	sys-libs/libseccomp:=
@@ -121,6 +123,11 @@ src_install() {
 	insinto /etc/containers
 	newins test/registries.conf registries.conf.example
 	newins test/policy.json policy.json.example
+
+	if use cni; then
+		insinto /etc/cni/net.d
+		doins cni/87-podman-bridge.conflist
+	fi
 
 	insinto /usr/share/containers
 	doins vendor/github.com/containers/common/pkg/seccomp/seccomp.json
