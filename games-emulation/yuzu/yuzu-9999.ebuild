@@ -8,7 +8,7 @@ inherit cmake git-r3 toolchain-funcs xdg
 DESCRIPTION="An emulator for Nintendo Switch"
 HOMEPAGE="https://yuzu-emu.org"
 EGIT_REPO_URI="https://github.com/yuzu-emu/yuzu"
-EGIT_SUBMODULES=('-*' 'dynarmic' 'sirit' 'xbyak')
+EGIT_SUBMODULES=('-*' 'dynarmic' 'sirit' 'xbyak' 'tzdb_to_nx' 'externals/nx_tzdb/tzdb_to_nx/externals/tz/tz' 'VulkanMemoryAllocator')
 # Dynarmic is not intended to be generic, it is tweaked to fit emulated processor
 # TODO wait 'xbyak' waiting version bump. see #860816
 
@@ -47,7 +47,7 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	dev-cpp/cpp-httplib
 	dev-cpp/cpp-jwt
-	system-vulkan? ( >=dev-util/vulkan-headers-1.3.236 )
+	system-vulkan? ( >=dev-util/vulkan-headers-1.3.246 )
 	test? ( <dev-cpp/catch-3:0 )
 "
 BDEPEND="
