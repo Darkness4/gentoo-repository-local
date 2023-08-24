@@ -10,7 +10,7 @@ inherit go-module
 DESCRIPTION="NVIDIA container runtime toolkit"
 HOMEPAGE="https://github.com/NVIDIA/nvidia-container-toolkit"
 
-if [[ "${PV}" == "9999" ]] ; then
+if [[ "${PV}" == "9999" ]]; then
 	EGIT_REPO_URI="https://github.com/NVIDIA/${PN}.git"
 	inherit git-r3
 
@@ -54,7 +54,8 @@ src_install() {
 	dobin "nvidia-ctk"
 
 	insinto "/etc/nvidia-container-runtime"
-	doins "${FILESDIR}/config.toml"
+
+	nvidia-ctk --quiet config default --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml"
 
 	if use hook; then
 		insinto "/usr/libexec/oci/hooks.d"
@@ -73,4 +74,3 @@ pkg_postinst() {
 	elog "file before running ${PN} for the first time."
 	elog "For details, please see the NVIDIA docker manual page."
 }
-

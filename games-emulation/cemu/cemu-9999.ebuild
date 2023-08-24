@@ -31,6 +31,7 @@ DEPEND="app-arch/zstd
   cubeb? ( media-libs/cubeb )
   dev-libs/boost
   dev-libs/glib
+  dev-libs/hidapi
   >=dev-libs/libfmt-9.1.0:=
   dev-libs/libzip
   dev-libs/openssl
