@@ -20,7 +20,6 @@ if [[ "${PV}" == "9999" ]]; then
 else
 	SRC_URI="
 		https://github.com/NVIDIA/${PN}/archive/v${PV/_rc/-rc.}.tar.gz -> ${P}.tar.gz
-		https://media.githubusercontent.com/media/vowstar/distfiles/main/${P}-deps.tar.xz
 	"
 	S="${WORKDIR}/${PN}-${PV/_rc/-rc.}"
 	KEYWORDS="~amd64"
@@ -55,7 +54,7 @@ src_install() {
 
 	insinto "/etc/nvidia-container-runtime"
 
-	nvidia-ctk --quiet config default --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml"
+	nvidia-ctk --quiet config --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml"
 
 	if use hook; then
 		insinto "/usr/libexec/oci/hooks.d"
