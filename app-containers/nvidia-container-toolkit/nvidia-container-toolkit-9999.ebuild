@@ -28,7 +28,7 @@ fi
 LICENSE="Apache-2.0"
 SLOT="0"
 
-IUSE="hook"
+IUSE="hook operator-extensions"
 
 RDEPEND="
 	sys-libs/libnvidia-container
@@ -46,17 +46,18 @@ src_compile() {
 }
 
 src_install() {
-	dobin "nvidia-container-runtime-hook"
-	dobin "nvidia-container-runtime"
-	dobin "nvidia-container-runtime.cdi"
-	dobin "nvidia-container-runtime.legacy"
 	dobin "nvidia-ctk"
-
-	insinto "/etc/nvidia-container-runtime"
+	dobin "nvidia-container-runtime"
+	if use operator-extensions; then
+		dobin "nvidia-container-runtime.cdi"
+		dobin "nvidia-container-runtime.legacy"
+	fi
 
 	nvidia-ctk --quiet config --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml"
 
 	if use hook; then
+		dobin "nvidia-container-runtime-hook"
+
 		insinto "/usr/libexec/oci/hooks.d"
 		doins "oci-nvidia-hook"
 
