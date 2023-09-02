@@ -19,6 +19,8 @@ EZIG_MAX_EXCLUSIVE="99991"
 DEPEND="dev-lang/zig:${EZIG_MIN}"
 RDEPEND="${DEPEND}"
 
+RESTRICT="network-sandbox"
+
 # see https://github.com/ziglang/zig/issues/3382
 # For now, Zig Build System doesn't support CFLAGS/LDFLAGS/etc.
 QA_FLAGS_IGNORED="usr/bin/zls"
