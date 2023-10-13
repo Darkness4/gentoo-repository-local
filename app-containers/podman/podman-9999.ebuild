@@ -3,148 +3,104 @@
 
 EAPI=8
 
-inherit bash-completion-r1 flag-o-matic go-module tmpfiles
+inherit go-module tmpfiles linux-info
 
-DESCRIPTION="Library and podman tool for running OCI-based containers in Pods"
-HOMEPAGE="https://github.com/containers/podman/"
-MY_PN=podman
-MY_P=${MY_PN}-${PV}
-if [[ "${PV}" == "9999" ]]; then
-	EGIT_REPO_URI="https://github.com/containers/${PN}.git"
+DESCRIPTION="A tool for managing OCI containers and pods with Docker-compatible CLI"
+HOMEPAGE="https://github.com/containers/podman/ https://podman.io/"
+
+if [[ ${PV} == *9999* ]]; then
 	inherit git-r3
-
-	src_unpack() {
-		git-r3_src_unpack
-	}
+	EGIT_REPO_URI="https://github.com/containers/podman.git"
 else
-	EGIT_COMMIT="75e3c12579d391b81d871fd1cded6cf0d043550a"
-	SRC_URI="https://github.com/containers/podman/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~arm64 ~ppc64 ~riscv"
-	S=${WORKDIR}/${MY_P}
+	SRC_URI="https://github.com/containers/podman/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="~amd64 ~arm64 ~riscv"
 fi
+
 LICENSE="Apache-2.0 BSD BSD-2 CC-BY-SA-4.0 ISC MIT MPL-2.0"
 SLOT="0"
-
-KEYWORDS="~amd64 ~arm64 ~ppc64 ~riscv"
-IUSE="apparmor btrfs cgroup-hybrid +fuse +init +rootless +cni netavark selinux"
+IUSE="apparmor btrfs cgroup-hybrid wrapper +fuse +init +rootless +seccomp +cni netavark selinux systemd"
 RESTRICT="test"
 
-COMMON_DEPEND="
+RDEPEND="
 	app-crypt/gpgme:=
 	>=app-containers/conmon-2.0.0
-	cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6  )
-	!cgroup-hybrid? ( app-containers/crun )
+	>=app-containers/containers-common-0.56.0
 	dev-libs/libassuan:=
 	dev-libs/libgpg-error:=
 	cni? ( >=app-containers/cni-plugins-0.8.6 )
 	netavark? ( app-containers/netavark app-containers/aardvark-dns )
 	sys-apps/shadow:=
-	sys-fs/lvm2
-	sys-libs/libseccomp:=
 
 	apparmor? ( sys-libs/libapparmor )
 	btrfs? ( sys-fs/btrfs-progs )
+	cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6  )
+	!cgroup-hybrid? ( app-containers/crun )
+	wrapper? ( !app-containers/docker-cli )
+	fuse? ( sys-fs/fuse-overlayfs )
 	init? ( app-containers/catatonit )
 	rootless? ( app-containers/slirp4netns )
-	selinux? ( sys-libs/libselinux:= )
+	seccomp? ( sys-libs/libseccomp:= )
+	selinux? ( sec-policy/selinux-podman sys-libs/libselinux:= )
+	systemd? ( sys-apps/systemd:= )
 "
-DEPEND="
-	${COMMON_DEPEND}
-	dev-go/go-md2man"
-RDEPEND="${COMMON_DEPEND}
-	fuse? ( sys-fs/fuse-overlayfs )
-	selinux? ( sec-policy/selinux-podman )"
+DEPEND="${RDEPEND}"
+BDEPEND="
+	dev-go/go-md2man
+"
+
+PATCHES=(
+	"${FILESDIR}/seccomp-toggle-4.7.0.patch"
+)
+
+CONFIG_CHECK="
+	~USER_NS
+"
+
+pkg_setup() {
+	use btrfs && CONFIG_CHECK+=" ~BTRFS_FS"
+	linux-info_pkg_setup
+}
 
 src_prepare() {
 	default
+	local file
+	for file in apparmor_tag btrfs_installed_tag btrfs_tag systemd_tag; do
+		[[ -f hack/"${file}".sh ]] || die
+	done
 
-	# Disable installation of python modules here, since those are
-	# installed by separate ebuilds.
-	local makefile_sed_args=(
-		-e '/^GIT_.*/d'
-		-e 's/$(GO) build/$(GO) build -v -work -x/'
-		-e 's/^\(install:.*\) install\.python$/\1/'
-		-e 's|^pkg/varlink/iopodman.go: .gopathok pkg/varlink/io.podman.varlink$|pkg/varlink/iopodman.go: pkg/varlink/io.podman.varlink|'
-	)
+	local feature
+	for feature in apparmor systemd; do
+		cat <<-EOF >hack/"${feature}"_tag.sh || die
+			#!/usr/bin/env bash
+			$(usex ${feature} "echo ${feature}" echo)
+		EOF
+	done
 
-	has_version -b '>=dev-lang/go-1.13.9' || makefile_sed_args+=(-e 's:GO111MODULE=off:GO111MODULE=on:')
-
-	sed "${makefile_sed_args[@]}" -i Makefile || die
+	echo -e "#!/usr/bin/env bash\n echo" >hack/btrfs_installed_tag.sh || die
+	cat <<-EOF >hack/btrfs_tag.sh || die
+		#!/usr/bin/env bash
+		$(usex btrfs echo 'echo exclude_graphdriver_btrfs btrfs_noversion')
+	EOF
 }
 
 src_compile() {
-	local git_commit=${EGIT_COMMIT}
-
-	# Filter unsupported linker flags
-	filter-flags '-Wl,*'
-
-	[[ -f hack/apparmor_tag.sh ]] || die
-	if use apparmor; then
-		echo -e "#!/bin/sh\necho apparmor" >hack/apparmor_tag.sh || die
-	else
-		echo -e "#!/bin/sh\ntrue" >hack/apparmor_tag.sh || die
-	fi
-
-	[[ -f hack/btrfs_installed_tag.sh ]] || die
-	if use btrfs; then
-		echo -e "#!/bin/sh\ntrue" >hack/btrfs_installed_tag.sh || die
-	else
-		echo -e "#!/bin/sh\necho exclude_graphdriver_btrfs" > \
-			hack/btrfs_installed_tag.sh || die
-	fi
-
-	[[ -f hack/selinux_tag.sh ]] || die
-	if use selinux; then
-		echo -e "#!/bin/sh\necho selinux" >hack/selinux_tag.sh || die
-	else
-		echo -e "#!/bin/sh\ntrue" >hack/selinux_tag.sh || die
-	fi
-
-	# Avoid this error when generating pkg/varlink/iopodman.go:
-	# cannot find package "github.com/varlink/go/varlink/idl"
-	mkdir -p _output || die
-	ln -snf ../vendor _output/src || die
-	GO111MODULE=off GOPATH=${PWD}/_output go generate ./pkg/varlink/... || die
-	rm _output/src || die
-
-	export -n GOCACHE GOPATH XDG_CACHE_HOME
-	GOBIN="${S}/bin" \
-		emake all \
-		PREFIX="${EPREFIX}/usr" \
-		GIT_BRANCH=master \
-		GIT_BRANCH_CLEAN=master \
-		COMMIT_NO="${git_commit}" \
-		GIT_COMMIT="${git_commit}"
+	export PREFIX="${EPREFIX}/usr"
+	emake BUILDFLAGS="-v -work -x" GOMD2MAN="go-md2man" BUILD_SECCOMP="$(usex seccomp)" all $(usev wrapper docker-docs)
 }
 
 src_install() {
-	emake DESTDIR="${D}" PREFIX="${EPREFIX}/usr" install
-
-	insinto /etc/containers
-	newins test/registries.conf registries.conf.example
-	newins test/policy.json policy.json.example
+	emake DESTDIR="${D}" install install.completions $(usev wrapper install.docker-full)
 
 	if use cni; then
 		insinto /etc/cni/net.d
 		doins cni/87-podman-bridge.conflist
 	fi
 
-	insinto /usr/share/containers
-	doins vendor/github.com/containers/common/pkg/seccomp/seccomp.json
-
 	newconfd "${FILESDIR}"/podman.confd podman
 	newinitd "${FILESDIR}"/podman.initd podman
 
 	insinto /etc/logrotate.d
 	newins "${FILESDIR}/podman.logrotated" podman
-
-	dobashcomp completions/bash/*
-
-	insinto /usr/share/zsh/site-functions
-	doins completions/zsh/*
-
-	insinto /usr/share/fish/vendor_completions.d
-	doins completions/fish/*
 
 	keepdir /var/lib/containers
 }
@@ -157,18 +113,9 @@ pkg_preinst() {
 }
 
 pkg_postinst() {
-	tmpfiles_process podman.conf
+	tmpfiles_process podman.conf $(usev wrapper podman-docker.conf)
 
 	local want_newline=false
-	if [[ ! (-e ${EROOT%/*}/etc/containers/policy.json && -e ${EROOT%/*}/etc/containers/registries.conf) ]]; then
-		elog "You need to create the following config files:"
-		elog "/etc/containers/registries.conf"
-		elog "/etc/containers/policy.json"
-		elog "To copy over default examples, use:"
-		elog "cp /etc/containers/registries.conf{.example,}"
-		elog "cp /etc/containers/policy.json{.example,}"
-		want_newline=true
-	fi
 	if [[ ${PODMAN_ROOTLESS_UPGRADE} == true ]]; then
 		${want_newline} && elog ""
 		elog "For rootless operation, you need to configure subuid/subgid"

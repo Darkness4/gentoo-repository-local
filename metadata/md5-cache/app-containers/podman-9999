@@ -1,16 +1,15 @@
-BDEPEND=>=dev-lang/go-1.18 app-arch/unzip >=dev-vcs/git-1.8.2.1[curl]
-DEFINED_PHASES=compile install postinst preinst prepare unpack
-DEPEND=app-crypt/gpgme:= >=app-containers/conmon-2.0.0 cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6 ) !cgroup-hybrid? ( app-containers/crun ) dev-libs/libassuan:= dev-libs/libgpg-error:= cni? ( >=app-containers/cni-plugins-0.8.6 ) netavark? ( app-containers/netavark app-containers/aardvark-dns ) sys-apps/shadow:= sys-fs/lvm2 sys-libs/libseccomp:= apparmor? ( sys-libs/libapparmor ) btrfs? ( sys-fs/btrfs-progs ) init? ( app-containers/catatonit ) rootless? ( app-containers/slirp4netns ) selinux? ( sys-libs/libselinux:= ) dev-go/go-md2man
-DESCRIPTION=Library and podman tool for running OCI-based containers in Pods
+BDEPEND=dev-go/go-md2man >=dev-lang/go-1.18 app-arch/unzip >=dev-vcs/git-1.8.2.1[curl]
+DEFINED_PHASES=compile install postinst preinst prepare setup unpack
+DEPEND=app-crypt/gpgme:= >=app-containers/conmon-2.0.0 >=app-containers/containers-common-0.56.0 dev-libs/libassuan:= dev-libs/libgpg-error:= cni? ( >=app-containers/cni-plugins-0.8.6 ) netavark? ( app-containers/netavark app-containers/aardvark-dns ) sys-apps/shadow:= apparmor? ( sys-libs/libapparmor ) btrfs? ( sys-fs/btrfs-progs ) cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6 ) !cgroup-hybrid? ( app-containers/crun ) wrapper? ( !app-containers/docker-cli ) fuse? ( sys-fs/fuse-overlayfs ) init? ( app-containers/catatonit ) rootless? ( app-containers/slirp4netns ) seccomp? ( sys-libs/libseccomp:= ) selinux? ( sec-policy/selinux-podman sys-libs/libselinux:= ) systemd? ( sys-apps/systemd:= )
+DESCRIPTION=A tool for managing OCI containers and pods with Docker-compatible CLI
 EAPI=8
-HOMEPAGE=https://github.com/containers/podman/
-INHERIT=bash-completion-r1 flag-o-matic go-module tmpfiles git-r3
-IUSE=apparmor btrfs cgroup-hybrid +fuse +init +rootless +cni netavark selinux
-KEYWORDS=~amd64 ~arm64 ~ppc64 ~riscv
+HOMEPAGE=https://github.com/containers/podman/ https://podman.io/
+INHERIT=go-module tmpfiles linux-info git-r3
+IUSE=apparmor btrfs cgroup-hybrid wrapper +fuse +init +rootless +seccomp +cni netavark selinux systemd
 LICENSE=Apache-2.0 BSD BSD-2 CC-BY-SA-4.0 ISC MIT MPL-2.0
 PROPERTIES=live
-RDEPEND=app-crypt/gpgme:= >=app-containers/conmon-2.0.0 cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6 ) !cgroup-hybrid? ( app-containers/crun ) dev-libs/libassuan:= dev-libs/libgpg-error:= cni? ( >=app-containers/cni-plugins-0.8.6 ) netavark? ( app-containers/netavark app-containers/aardvark-dns ) sys-apps/shadow:= sys-fs/lvm2 sys-libs/libseccomp:= apparmor? ( sys-libs/libapparmor ) btrfs? ( sys-fs/btrfs-progs ) init? ( app-containers/catatonit ) rootless? ( app-containers/slirp4netns ) selinux? ( sys-libs/libselinux:= ) fuse? ( sys-fs/fuse-overlayfs ) selinux? ( sec-policy/selinux-podman ) virtual/tmpfiles
+RDEPEND=app-crypt/gpgme:= >=app-containers/conmon-2.0.0 >=app-containers/containers-common-0.56.0 dev-libs/libassuan:= dev-libs/libgpg-error:= cni? ( >=app-containers/cni-plugins-0.8.6 ) netavark? ( app-containers/netavark app-containers/aardvark-dns ) sys-apps/shadow:= apparmor? ( sys-libs/libapparmor ) btrfs? ( sys-fs/btrfs-progs ) cgroup-hybrid? ( >=app-containers/runc-1.0.0_rc6 ) !cgroup-hybrid? ( app-containers/crun ) wrapper? ( !app-containers/docker-cli ) fuse? ( sys-fs/fuse-overlayfs ) init? ( app-containers/catatonit ) rootless? ( app-containers/slirp4netns ) seccomp? ( sys-libs/libseccomp:= ) selinux? ( sec-policy/selinux-podman sys-libs/libselinux:= ) systemd? ( sys-apps/systemd:= ) virtual/tmpfiles
 RESTRICT=test strip
 SLOT=0
-_eclasses_=toolchain-funcs	0c8a0b0d318eb5d5180d114bd3f6592b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	bash-completion-r1	f5e7a020fd9c741740756aac61bf75ff	flag-o-matic	ad475baa777c9978fa035216c8264a10	multiprocessing	b4e253ab22cef7b1085e9b67c7a3b730	go-module	8624eede24936fd7666e5298e5332f22	tmpfiles	216aa76c3a6fcb5d893c23a0de86048f	git-r3	2358a7b20091609e24bd3a83b3ac5991
-_md5_=2ad7c0e0bce97443ce811b5085f95e5c
+_eclasses_=multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	fbbbc99d10168de2926e06da7169b8dc	multilib	c19072c3cd7ac5cb21de013f7e9832e0	go-module	8624eede24936fd7666e5298e5332f22	tmpfiles	216aa76c3a6fcb5d893c23a0de86048f	linux-info	c4f1201b96a8a2c1f3b86cc8b2c71c91	git-r3	2358a7b20091609e24bd3a83b3ac5991
+_md5_=d684fc5caeabaa482d33527a685cb22b

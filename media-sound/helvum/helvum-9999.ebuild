@@ -14,8 +14,10 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 RESTRICT="network-sandbox"
 
-DEPEND=">=media-video/pipewire-0.3
-		>=gui-libs/gtk-4.4.0"
+DEPEND="media-video/pipewire:=
+		dev-libs/glib:2
+		gui-libs/gtk:4
+		gui-libs/libadwaita"
 RDEPEND="${DEPEND}"
 BDEPEND=">=sys-devel/clang-3.7
 		dev-util/meson
