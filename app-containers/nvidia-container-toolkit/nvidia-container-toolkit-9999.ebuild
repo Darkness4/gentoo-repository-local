@@ -16,6 +16,7 @@ if [[ "${PV}" == "9999" ]]; then
 
 	src_unpack() {
 		git-r3_src_unpack
+		go-module_live_vendor
 	}
 else
 	SRC_URI="
