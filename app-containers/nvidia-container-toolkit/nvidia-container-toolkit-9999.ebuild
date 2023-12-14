@@ -16,6 +16,8 @@ if [[ "${PV}" == "9999" ]]; then
 
 	src_unpack() {
 		git-r3_src_unpack
+
+		[[ -d "${S}"/vendor ]] && rm -rf "${S}"/vendor
 		go-module_live_vendor
 	}
 else

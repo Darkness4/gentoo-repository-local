@@ -8,7 +8,7 @@ inherit cmake git-r3 toolchain-funcs xdg
 DESCRIPTION="An emulator for Nintendo Switch"
 HOMEPAGE="https://yuzu-emu.org"
 EGIT_REPO_URI="https://github.com/yuzu-emu/yuzu"
-EGIT_SUBMODULES=('-*' 'dynarmic' 'sirit' 'xbyak' 'tzdb_to_nx' 'externals/nx_tzdb/tzdb_to_nx/externals/tz/tz' 'VulkanMemoryAllocator')
+EGIT_SUBMODULES=('-*' 'dynarmic' 'sirit' 'xbyak' 'tzdb_to_nx' 'externals/nx_tzdb/tzdb_to_nx/externals/tz/tz' 'VulkanMemoryAllocator' 'breakpad' 'simpleini')
 # Dynarmic is not intended to be generic, it is tweaked to fit emulated processor
 # TODO wait 'xbyak' waiting version bump. see #860816
 
@@ -21,7 +21,6 @@ IUSE="+compatibility-list +cubeb discord qt5 +qt6 sdl +system-libfmt +system-vul
 RDEPEND="
 	<net-libs/mbedtls-3.1[cmac]
 	>=app-arch/zstd-1.5
-	>=dev-libs/inih-52
 	>=dev-libs/openssl-1.1:=
 	>=media-video/ffmpeg-4.3:=
 	>=net-libs/enet-1.3
@@ -101,12 +100,6 @@ src_prepare() {
 	# temporary fix
 	sed -i -e '/Werror/d' src/CMakeLists.txt || die
 
-	# Unbundle inih
-	sed -i -e '/^if.*inih/,/^endif()/d' externals/CMakeLists.txt || die
-	sed -i -e '1afind_package(PkgConfig REQUIRED)\npkg_check_modules(INIH REQUIRED INIReader)' \
-		src/yuzu_cmd/CMakeLists.txt || die
-	sed -i -e 's:inih/cpp/::' src/yuzu_cmd/config.cpp || die
-
 	# Unbundle mbedtls
 	sed -i -e '/^# mbedtls/,/^endif()/d' externals/CMakeLists.txt || die
 	sed -i -e 's/mbedtls/& mbedcrypto mbedx509/' \
@@ -172,6 +165,7 @@ src_configure() {
 		-DYUZU_TESTS=$(usex test)
 		-DYUZU_USE_EXTERNAL_VULKAN_HEADERS=$([ use system-vulkan ] && echo ON || echo OFF)
 		-DYUZU_USE_EXTERNAL_SDL2=OFF
+		-DYUZU_CRASH_DUMPS=ON
 		-DYUZU_CHECK_SUBMODULES=false
 		-DYUZU_USE_QT_WEB_ENGINE=$(usex webengine)
 	)
