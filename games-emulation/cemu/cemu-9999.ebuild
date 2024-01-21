@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -24,37 +24,37 @@ fi
 
 LICENSE="MPL-2.0 ISC"
 SLOT="0"
+IUSE="+cubeb discord +sdl +vulkan wayland"
 
-IUSE="+cubeb discord +sdl +vulkan +opengl wayland"
-
-DEPEND="app-arch/zstd
-  cubeb? ( media-libs/cubeb )
-  dev-libs/boost
-  dev-libs/glib
-  dev-libs/hidapi
-  >=dev-libs/libfmt-9.1.0:=
-  dev-libs/libzip
-  dev-libs/openssl
-  dev-libs/pugixml
-  dev-libs/rapidjson
-  wayland? (
-    dev-libs/wayland
-  )
-  dev-util/glslang
-  opengl? (
-    media-libs/libglvnd
-  )
-  media-libs/libsdl2[joystick,threads]
-  net-misc/curl
-  sys-libs/zlib
-  vulkan? ( dev-util/vulkan-headers )
-  x11-libs/gtk+:3[wayland?]
-  x11-libs/libX11
-  x11-libs/wxGTK:3.2-gtk3[opengl?]"
+DEPEND="app-arch/zarchive
+	app-arch/zstd
+	cubeb? ( media-libs/cubeb )
+	dev-libs/boost
+	dev-libs/glib
+	dev-libs/hidapi
+	>=dev-libs/libfmt-9.1.0:=
+	dev-libs/libzip
+	dev-libs/openssl
+	dev-libs/pugixml
+	dev-libs/rapidjson
+	wayland? ( dev-libs/wayland )
+	dev-util/glslang
+	media-libs/libglvnd
+	media-libs/libsdl2[haptic,joystick,threads]
+	net-misc/curl
+	sys-libs/zlib
+	vulkan? ( dev-util/vulkan-headers )
+	x11-libs/gtk+:3[wayland?]
+	x11-libs/libX11
+	x11-libs/wxGTK:3.2-gtk3[opengl]
+	virtual/libusb"
 RDEPEND="${DEPEND}"
 BDEPEND="media-libs/glm"
 
 src_prepare() {
+  sed -re \
+    's/^target_link_libraries\(CemuBin.*/target_link_libraries(CemuBin PRIVATE wayland-client/' \
+    -i src/CMakeLists.txt || die
   cmake_src_prepare
 }
 
@@ -63,7 +63,7 @@ src_configure() {
     -DBUILD_SHARED_LIBS=OFF
     -DENABLE_CUBEB=$(usex cubeb)
     -DENABLE_DISCORD_RPC=$(usex discord)
-    -DENABLE_OPENGL=$(usex opengl)
+    -DENABLE_OPENGL=ON
     -DENABLE_SDL=$(usex sdl)
     -DENABLE_VCPKG=OFF
     -DENABLE_WAYLAND=$(usex wayland)
@@ -71,6 +71,7 @@ src_configure() {
     -DENABLE_WXWIDGETS=ON
     -DPORTABLE=OFF
     -DwxWidgets_CONFIG_EXECUTABLE=/usr/$(get_libdir)/wx/config/gtk3-unicode-3.2-gtk3
+    -DCMAKE_DISABLE_PRECOMPILE_HEADERS=OFF
     -Wno-dev
   )
   cmake_src_configure
