@@ -127,10 +127,12 @@ src_install() {
 
 pkg_postinst() {
 	udev_reload
+	xdg_icon_cache_update
 
 	einfo "If you get \"Error: Failed to gain CAP_SYS_ADMIN\", run \`setcap cap_sys_admin+p \$(readlink -f \$(which sunshine))\` as root"
 }
 
 pkg_postrm() {
 	udev_reload
+	xdg_icon_cache_update
 }
