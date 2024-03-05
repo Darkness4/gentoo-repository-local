@@ -8,7 +8,6 @@ inherit git-r3 fcaps toolchain-funcs
 DESCRIPTION="tool to turn traditional container/OS images into unprivileged sandboxes"
 HOMEPAGE="https://github.com/NVIDIA/enroot"
 EGIT_REPO_URI="https://github.com/NVIDIA/${PN}.git"
-EGIT_COMMIT="v${PV}"
 
 LICENSE="Apache-2.0 GPL-2 MIT || ( BSD ISC )"
 SLOT="0"
@@ -19,7 +18,7 @@ RDEPEND="app-arch/zstd
 	app-misc/jq
 	sys-fs/squashfs-tools
 	sys-process/parallel"
-BDEPEND="sys-devel/libtool"
+BDEPEND="dev-build/libtool"
 
 FILECAPS=(
 	cap_sys_admin+pe usr/bin/enroot-mksquashovlfs --
@@ -37,10 +36,10 @@ src_unpack() {
 }
 
 src_compile() {
-	emake ARCH=$(tc-arch-kernel) prefix=/usr sysconfdir=/etc
+	emake ARCH=$(tc-arch-kernel) prefix=/usr sysconfdir=/etc FORCE_GLIBC=1
 }
 
 src_install() {
-	emake DESTDIR="${D}" install prefix=/usr sysconfdir=/etc
+	emake DESTDIR="${D}" install prefix=/usr sysconfdir=/etc FORCE_GLIBC=1
 	einstalldocs
 }

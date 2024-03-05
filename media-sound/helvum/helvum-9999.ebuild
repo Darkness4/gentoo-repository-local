@@ -20,5 +20,5 @@ DEPEND="media-video/pipewire:=
 		gui-libs/libadwaita"
 RDEPEND="${DEPEND}"
 BDEPEND=">=sys-devel/clang-3.7
-		dev-util/meson
+		dev-build/meson
 		virtual/rust"
