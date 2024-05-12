@@ -45,6 +45,7 @@ BDEPEND="
 "
 
 src_compile() {
+	sed -i 's/^\(EXTLDFLAGS\s*=\s*\)\(.*\)/\1\2 -Wl,-z,lazy/' Makefile
 	emake binaries
 }
 
@@ -56,7 +57,7 @@ src_install() {
 		dobin "nvidia-container-runtime.legacy"
 	fi
 
-	nvidia-ctk --quiet config --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml"
+	./nvidia-ctk --quiet config --in-place --config="${EPREFIX}/etc/nvidia-container-runtime/config.toml" || die
 
 	if use hook; then
 		dobin "nvidia-container-runtime-hook"
