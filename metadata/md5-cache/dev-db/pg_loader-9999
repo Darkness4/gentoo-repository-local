@@ -1,0 +1,14 @@
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl]
+DEFINED_PHASES=compile install unpack
+DEPEND=dev-lisp/sbcl dev-db/freetds dev-libs/libzip
+DESCRIPTION=Loading data into PostgreSQL
+EAPI=8
+HOMEPAGE=http://pgloader.io
+INHERIT=git-r3
+KEYWORDS=x86 amd64
+PROPERTIES=live
+RDEPEND=dev-lisp/sbcl dev-db/freetds dev-libs/libzip
+RESTRICT=network-sandbox nostrip
+SLOT=0
+_eclasses_=git-r3	fbb2889c81f3a05910c1524db69425c1
+_md5_=d2046ed28ee17d9754b94362a149932b
