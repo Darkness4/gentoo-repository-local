@@ -3,12 +3,12 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=(python3_{9..11})
 inherit git-r3 meson python-any-r1 virtualx xdg
 
 DESCRIPTION="A lightweight compositor for X11 (previously a compton fork)"
-HOMEPAGE="https://github.com/xealea/picom"
-EGIT_REPO_URI="https://github.com/catb00mer/picom.git"
+HOMEPAGE="https://github.com/FT-Labs/picom"
+EGIT_REPO_URI="https://github.com/FT-Labs/picom.git"
 EGIT_BRANCH="next"
 
 LICENSE="MPL-2.0 MIT"
@@ -16,7 +16,7 @@ SLOT="0"
 IUSE="+config-file dbus +doc +drm opengl pcre test"
 
 REQUIRED_USE="test? ( dbus )" # avoid "DBus support not compiled in!"
-RESTRICT="test" # but tests require dbus_next
+RESTRICT="test"               # but tests require dbus_next
 
 RDEPEND="dev-libs/libev
 	dev-libs/uthash
@@ -26,6 +26,7 @@ RDEPEND="dev-libs/libev
 	x11-libs/pixman
 	x11-libs/xcb-util-image
 	x11-libs/xcb-util-renderutil
+	media-libs/libepoxy
 	config-file? (
 		dev-libs/libconfig:=
 	)
@@ -41,7 +42,7 @@ BDEPEND="virtual/pkgconfig
 	test? ( $(python_gen_any_dep 'dev-python/xcffib[${PYTHON_USEDEP}]') )
 "
 
-DOCS=( README.md picom.sample.conf )
+DOCS=(README.md picom.sample.conf)
 
 python_check_deps() {
 	python_has_version "dev-python/xcffib[${PYTHON_USEDEP}]"
