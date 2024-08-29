@@ -11,5 +11,5 @@ LICENSE=Apache-2.0 GPL-2 MIT || ( BSD ISC )
 PROPERTIES=live
 RDEPEND=app-arch/zstd app-misc/jq sys-fs/squashfs-tools sys-process/parallel
 SLOT=0
-_eclasses_=git-r3	fbb2889c81f3a05910c1524db69425c1	fcaps	c0a086b957a1b183a8d136eabf02f191	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084	multilib	c19072c3cd7ac5cb21de013f7e9832e0
+_eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81	fcaps	c0a086b957a1b183a8d136eabf02f191	toolchain-funcs	333970c740aa7b1a92e4fcdc52f612bd	multilib	c19072c3cd7ac5cb21de013f7e9832e0
 _md5_=96d6b8d8891ac0a33eaaa7d9bd3621c1

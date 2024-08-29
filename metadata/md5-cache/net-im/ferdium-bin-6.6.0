@@ -11,4 +11,4 @@ RDEPEND=wayland? ( dev-libs/wayland )
 SLOT=0
 SRC_URI=amd64? ( https://github.com/ferdium/ferdium-app/releases/download/v6.6.0/Ferdium-linux-6.6.0-amd64.deb )
 _eclasses_=desktop	021728fdc1b03b36357dbc89489e0f0d	xdg-utils	baea6080dd821f5562d715887954c9d3
-_md5_=63df6025838467002caaf538d2f2a230
+_md5_=a7df6d66174c9fd5c4a7788016c52b8c
