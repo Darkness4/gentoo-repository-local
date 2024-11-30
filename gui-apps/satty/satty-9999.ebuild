@@ -25,7 +25,7 @@ LICENSE="MPL-2.0"
 SLOT="0"
 
 RDEPEND="
-	virtual/rust
+	dev-lang/rust
 	dev-libs/glib:2
 	media-libs/libepoxy
 	media-libs/mesa[opengl]
