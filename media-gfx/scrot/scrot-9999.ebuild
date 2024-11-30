@@ -7,9 +7,8 @@ inherit shell-completion
 
 DESCRIPTION="Screen capture utility using imlib2 library"
 HOMEPAGE="https://github.com/resurrecting-open-source-projects/scrot"
-if [[ ${PV} == *9999* ]] ; then
-	EGIT_REPO_URI="https://github.com/N-R-K/${PN}"
-  EGIT_BRANCH="freeze"
+if [[ ${PV} == *9999* ]]; then
+	EGIT_REPO_URI="https://github.com/resurrecting-open-source-projects/${PN}"
 	inherit autotools git-r3
 	LIVE_BDEPEND="dev-build/autoconf-archive"
 else
@@ -55,6 +54,6 @@ src_prepare() {
 src_install() {
 	default
 
-	dozshcomp  etc/zsh-completion/_scrot
+	dozshcomp etc/zsh-completion/_scrot
 	dobashcomp etc/bash-completion/scrot
 }
