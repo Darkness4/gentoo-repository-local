@@ -1,8 +1,7 @@
-# Copyright 2024 Gentoo Authors
+# Copyright 2021-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
-
 inherit cmake flag-o-matic xdg
 
 DESCRIPTION="Continuation fork of Yuzu."
@@ -30,8 +29,8 @@ SRC_URI="https://git.${PN}.dev/${PN}/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
 
 LICENSE="BSD GPL-2 GPL-2+ LGPL-2.1"
 SLOT="0"
-KEYWORDS="~amd64"
-IUSE="+compatibility-reporting +cubeb llvm-libunwind +web-service +webengine"
+KEYWORDS="~amd64 ~x86"
+IUSE="+compatibility-reporting +cubeb llvm-libunwind qt5 +qt6 +web-service +webengine"
 REQUIRED_USE="compatibility-reporting? ( web-service )"
 
 DEPEND=">=app-arch/zstd-1.5.0:=
@@ -48,16 +47,27 @@ DEPEND=">=app-arch/zstd-1.5.0:=
 	dev-libs/vulkan-memory-allocator:=
 	dev-util/vulkan-utility-libraries
 	dev-util/glslang
-	dev-qt/qtbase:6[widgets,gui,opengl,network]
-	dev-qt/qtmultimedia:6
-	webengine? ( dev-qt/qtwebengine:6 )
+	qt5? (
+		dev-qt/qtcore
+		dev-qt/qtdbus
+		dev-qt/qtmultimedia:5
+		dev-qt/qtwidgets
+	)
+	qt6? (
+		dev-qt/qtbase
+		dev-qt/qtmultimedia:6
+	)
 	media-libs/libsdl2
 	media-libs/libva
 	media-libs/opus
 	net-libs/enet:=
 	sys-libs/zlib
 	virtual/libusb:=
-	llvm-libunwind? ( sys-libs/llvm-libunwind )
+	webengine? (
+		qt5? ( dev-qt/qtwebengine:5 )
+		qt6? ( dev-qt/qtwebengine:6 )
+	)
+	llvm-libunwind? ( llvm-runtimes/libunwind )
 	!llvm-libunwind? ( sys-libs/libunwind:= )"
 RDEPEND="${DEPEND}
 	media-libs/vulkan-loader"
@@ -67,15 +77,19 @@ BDEPEND="app-arch/unzip
 	dev-cpp/robin-map
 	>=dev-util/vulkan-headers-1.3.275
 	dev-util/spirv-headers"
+REQUIRED_USE="|| ( qt5 qt6 )
+	qt5? ( !qt6 )
+	qt6? ( !qt5 )"
 
 S="${WORKDIR}/${PN}"
 
-PATCHES=("${FILESDIR}/${PN}-0001-system-libs.patch")
-
-pkg_setup() {
-	wget -t 1 --timeout=15 -O "${T}/compatibility_list.json" https://api.yuzu-emu.org/gamedb/ ||
-		rm -f "${T}/compatibility_list.json"
-}
+PATCHES=(
+	"${FILESDIR}/${PN}-0001-system-libs.patch"
+	"${FILESDIR}/${PN}-0002-boost-fix.patch"
+	"${FILESDIR}/${PN}-0003-fmt-10-fixes.patch"
+	"${FILESDIR}/${PN}-0004-header-fixes.patch"
+	"${FILESDIR}/${PN}-0005-boost-1.87.patch"
+)
 
 src_prepare() {
 	rm .gitmodules || die
@@ -103,10 +117,8 @@ src_prepare() {
 		-i externals/nx_tzdb/CMakeLists.txt || die
 	cmake_src_prepare
 	mkdir -p "${BUILD_DIR}/dist/compatibility_list" || die
-	if ! [ -f "${T}/compatibility_list.json" ]; then
-		einfo 'Using fallback compatibility list'
-		gunzip <"${FILESDIR}/${PN}-fallback-compat.json.gz" >"${T}/compatibility_list.json" || die
-	fi
+	einfo 'Using fallback compatibility list'
+	gunzip <"${FILESDIR}/${PN}-fallback-compat.json.gz" >"${T}/compatibility_list.json" || die
 	mv -f "${T}/compatibility_list.json" \
 		"${BUILD_DIR}/dist/compatibility_list/compatibility_list.json" || die
 }
@@ -122,6 +134,7 @@ src_configure() {
 		-DCMAKE_DISABLE_PRECOMPILE_HEADERS=OFF # FIXME
 		-DENABLE_COMPATIBILITY_LIST_DOWNLOAD=OFF
 		"-DENABLE_CUBEB=$(usex cubeb)"
+		"-DENABLE_QT6=$(usex qt6)"
 		"-DENABLE_WEB_SERVICE=$(usex web-service)"
 		-DGIT_BRANCH="${PN}"
 		-DGIT_DESC="${PV}"
@@ -135,7 +148,6 @@ src_configure() {
 		-DSUYU_USE_EXTERNAL_VULKAN_HEADERS=OFF
 		-DSUYU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES=OFF
 		-DSUYU_USE_QT_MULTIMEDIA=ON
-		-DENABLE_QT6=yes
 		"-DSUYU_USE_QT_WEB_ENGINE=$(usex webengine)"
 		-DSUYU_USE_FASTER_LD=OFF
 		-Wno-dev
