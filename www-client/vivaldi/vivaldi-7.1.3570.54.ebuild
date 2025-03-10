@@ -137,7 +137,6 @@ RDEPEND="
 	gtk? ( gui-libs/gtk:4 x11-libs/gtk+:3 )
 	proprietary-codecs? (
 		!ffmpeg-chromium? ( >=media-video/ffmpeg-7.0.2:0/58.60.60[chromium] )
-		ffmpeg-chromium? ( media-video/ffmpeg-chromium:${CHROMIUM_VERSION} )
 	)
 	qt6? ( dev-qt/qtbase:6[gui,widgets] )
 	widevine? ( www-plugins/chrome-binary-plugins )
@@ -202,7 +201,7 @@ src_install() {
 	done
 
 	if use proprietary-codecs; then
-		dosym ../../usr/$(get_libdir)/chromium/libffmpeg.so$(usex ffmpeg-chromium .${CHROMIUM_VERSION} "") \
+		dosym ../../usr/$(get_libdir)/chromium/libffmpeg.so \
 			/${VIVALDI_HOME}/libffmpeg.so.$(ver_cut 1-2)
 	fi
 
