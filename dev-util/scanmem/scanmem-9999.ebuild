@@ -3,14 +3,13 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..12} )
+PYTHON_COMPAT=(python3_{10..13})
 inherit autotools python-single-r1
 
 DESCRIPTION="Locate and modify variables in executing processes"
 HOMEPAGE="https://github.com/scanmem/scanmem"
 
-
-if [[ ${PV} = *9999* ]] ; then
+if [[ ${PV} = *9999* ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/scanmem/scanmem.git"
 else
@@ -57,7 +56,7 @@ src_configure() {
 src_install() {
 	default
 
-	if use gui ; then
+	if use gui; then
 		docinto gui
 		dodoc gui/{README,TODO}
 		python_fix_shebang "${ED}"
