@@ -1,6 +1,7 @@
-EAPI=7
+EAPI=8
 
-PYTHON_COMPAT=(python3_{10,11} pypy3)
+DISTUTILS_USE_PEP517=setuptools
+PYTHON_COMPAT=(python3_{10..13} pypy3)
 
 inherit distutils-r1 gnome2-utils
 
