@@ -3,13 +3,14 @@
 
 EAPI=8
 
-PYTHON_COMPAT=(python3_{10..13})
+PYTHON_COMPAT=(python3_{11..13})
 inherit desktop python-any-r1 flag-o-matic scons-utils
 inherit shell-completion toolchain-funcs xdg
 
 DESCRIPTION="Multi-platform 2D and 3D game engine with a feature-rich editor"
 HOMEPAGE="https://godotengine.org/"
 SRC_URI="
+	https://downloads.tuxfamily.org/godotengine/${PV}/${P}-stable.tar.xz
 	https://github.com/godotengine/godot/releases/download/${PV}-stable/${P}-stable.tar.xz
 "
 S=${WORKDIR}/${P}-stable
@@ -24,8 +25,9 @@ KEYWORDS="~amd64"
 # Enable roughly same as upstream by default so it works as expected,
 # except raycast (tools-only heavy dependency), and deprecated.
 IUSE="
-	alsa +dbus debug deprecated +fontconfig +gui pulseaudio raycast
-	speech test +theora +tools +udev +upnp +vulkan wayland +webp +mono
+	alsa +dbus debug deprecated double-precision +fontconfig +gui
+	pulseaudio raycast speech test +theora +tools +udev +upnp +vulkan
+	wayland +webp +mono
 "
 REQUIRED_USE="wayland? ( gui )"
 # TODO: tests still need more figuring out
@@ -43,7 +45,7 @@ RDEPEND="
 	media-libs/libogg
 	media-libs/libpng:=
 	media-libs/libvorbis
-	net-libs/mbedtls:3=
+	>=net-libs/mbedtls-3.6.2-r101:3=
 	net-libs/wslay
 	sys-libs/zlib:=
 	alsa? ( media-libs/alsa-lib )
@@ -64,7 +66,7 @@ RDEPEND="
 	)
 	pulseaudio? ( media-libs/libpulse )
 	speech? ( app-accessibility/speech-dispatcher )
-	theora? ( media-libs/libtheora )
+	theora? ( media-libs/libtheora:= )
 	tools? ( app-misc/ca-certificates )
 	udev? ( virtual/udev )
   mono? ( dev-lang/mono dev-dotnet/dotnet-sdk-bin:8.0 )
@@ -92,8 +94,8 @@ PATCHES=(
 src_prepare() {
   default
 
-  # mbedtls normally has mbedtls.pc, but Gentoo's slotted one is mbedtls3.pc
-  sed -E "/pkg-config/s/(mbedtls|mbedcrypto|mbedx509)/&3/g" \
+  # mbedtls normally has mbedtls.pc, but Gentoo's slotted one is mbedtls-3.pc
+  sed -E "/pkg-config/s/(mbedtls|mbedcrypto|mbedx509)/&-3/g" \
     -i platform/linuxbsd/detect.py || die
 
   sed -i "s|pkg-config |$(tc-getPKG_CONFIG) |" platform/linuxbsd/detect.py || die
@@ -121,17 +123,21 @@ src_compile() {
     progress=no
     verbose=yes
 
-    use_sowrap=no
+    target=$(usex tools editor template_$(usex debug{,} release))
+    dev_build=$(usex debug)
+    tests=$(usex tools $(usex test)) # bakes in --test in final binary
 
     alsa=$(usex alsa)
     dbus=$(usex dbus)
     deprecated=$(usex deprecated)
+    precision=$(usex double-precision double single)
     execinfo=no # not packaged, disables crash handler if non-glibc
     fontconfig=$(usex fontconfig)
     opengl3=$(usex gui)
     pulseaudio=$(usex pulseaudio)
     speechd=$(usex speech)
     udev=$(usex udev)
+    use_sowrap=no
     use_volk=no # unnecessary when linking directly to libvulkan
     vulkan=$(usex gui $(usex vulkan))
     wayland=$(usex wayland)
