@@ -31,7 +31,7 @@ IUSE="
 "
 REQUIRED_USE="wayland? ( gui )"
 # TODO: tests still need more figuring out
-RESTRICT="test"
+RESTRICT="test network-sandbox"
 
 # dlopen: libglvnd
 RDEPEND="
@@ -205,7 +205,15 @@ src_compile() {
     use_static_cpp=no
   )
 
-  escons "${esconsargs[@]}"
+  addpredict /dev/input
+  addpredict /dev/bus/usb
+
+  escons extra_suffix=main "${esconsargs[@]}"
+  if use mono; then
+    ./bin/godot*.main.mono --headless --generate-mono-glue modules/mono/glue || die
+    ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --godot-platform=linuxbsd || die
+    escons extra_suffix=main "${esconsargs[@]}"
+  fi
 }
 
 src_test() {
