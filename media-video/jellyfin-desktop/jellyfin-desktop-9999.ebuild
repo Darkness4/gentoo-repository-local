@@ -14,7 +14,7 @@ if [[ ${PV} == *9999* ]]; then
   inherit git-r3
 else
   SRC_URI="https://github.com/jellyfin/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-  KEYWORDS="amd64 arm arm64 ~loong ppc ppc64 ~riscv x86"
+  KEYWORDS="~amd64"
   S="${WORKDIR}"/${PN}-${PV}
 fi
 
