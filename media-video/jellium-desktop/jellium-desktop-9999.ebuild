@@ -2,18 +2,15 @@ EAPI=8
 
 inherit cargo desktop xdg
 
-DESCRIPTION="Jellyfin Desktop Client (Rust + CEF + mpv)"
-HOMEPAGE="
-  https://jellyfin.org/
-  https://github.com/jellyfin/${PN}
-"
+DESCRIPTION="A Jellyfin Desktop Client"
+HOMEPAGE="https://github.com/andrewrabert/${PN}"
 
 if [[ ${PV} == *9999* ]]; then
-  EGIT_REPO_URI="https://github.com/jellyfin/${PN}.git"
+  EGIT_REPO_URI="https://github.com/andrewrabert/${PN}.git"
   EGIT_SUBMODULES=()
   inherit git-r3
 else
-  SRC_URI="https://github.com/jellyfin/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+  SRC_URI="https://github.com/andrewrabert/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
   KEYWORDS="~amd64"
   S="${WORKDIR}"/${PN}-${PV}
 fi
@@ -96,6 +93,6 @@ src_install() {
 
   dosym /opt/${PN}/${PN} /usr/bin/${PN}
 
-  doicon -s scalable resources/linux/org.jellyfin.JellyfinDesktop.svg
-  domenu resources/linux/org.jellyfin.JellyfinDesktop.desktop
+  doicon -s scalable resources/linux/net.nullsum.JelliumDesktop.svg
+  domenu resources/linux/net.nullsum.JelliumDesktop.desktop
 }
